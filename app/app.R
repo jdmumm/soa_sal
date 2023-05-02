@@ -2,10 +2,10 @@ library(shiny)
 library(tidyverse)
 library(plotly)
 
-read.csv("sal_allDepts_22_10K.csv") -> raw
+read.csv("./app/sal_allDepts_22_10K.csv") -> raw
 raw %>% mutate (Class = str_remove(Title, "\\s*\\d+$")) -> all -> data
 
-read.csv("salSched_c23_220701_ann_long.csv") -> sal_long
+read.csv("./app/salSched_c23_220701_ann_long.csv") -> sal_long
 
 ui <- navbarPage(
   title = "State of Alaska Salaries, 2022",
