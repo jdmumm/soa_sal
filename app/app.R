@@ -1,12 +1,18 @@
+# https://jdmumm.shinyapps.io/soa_sal/
+
 library(shiny)
 library(tidyverse)
 library(plotly)
+library(knitr)
+library(kableExtra)
 
 read.csv("sal_allDepts_22_10K.csv") -> raw
 raw %>% mutate (Class = str_remove(Title, "\\s*\\d+$"),
                 wages = as.numeric(gsub("[^0-9.]", "", Annual.Wages))) -> data
 
 read.csv("salSched_c23_220701_ann_long.csv") -> sal_long
+
+read.csv("sal_allDepts_22_sum.csv", row.names = 1) -> summ
 
 ui <- navbarPage(
   title = "State of Alaska Salaries, 2022",
@@ -40,12 +46,14 @@ ui <- navbarPage(
             plotlyOutput("plot2", height = "800px", width = "100%"), 
             helpText("Step advancement is annual until step J, at which point it becomes biennial."),
             HTML("<a href='https://doa.alaska.gov/dof/payroll/sal_sched.html'> Data Source </a>")
-          )
-        )
+          ),
+    
+  #tabPanel("Summary Table by Title", tableOutput("kable_tab"))
+   tabPanel("Summary Table by Title", tableOutput("table"))
+)
 
 server <- function(input, output, session) {
-  # Server logic for Tab 1
-    # Create the scatter plot
+  #Tab 1
     output$plot <- renderPlotly({
       if ("All" %in% input$employers && "All" %in% input$classes) {data -> data_subset}
       if ("All" %in% input$employers && !("All" %in% input$classes)) {
@@ -59,23 +67,20 @@ server <- function(input, output, session) {
       p <- ggplot(data_subset, aes(x=Title, y=wages)) +
         geom_point(alpha = .2)
       
-      # Add tooltip text
       p <- p + aes(text = paste(Name, "<br>",
                                 Title, "<br>",
                                 Employer, "<br>",
                                 Annual.Wages))
       
-      # Customize the plot
-      p <- p + labs(x = "Title",
+            p <- p + labs(x = "Title",
                     y = "Annual Wages (thousands)") +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
         scale_y_continuous(labels = scales::comma_format(scale = 1e-3))
       
-      # Convert the plot to interactive mode using plotly
       ggplotly(p, tooltip = "text")
     })
   
-  # Server logic for Tab 2
+  #Tab 2
     output$plot2 <- renderPlotly({
     ggplot(sal_long, aes(x = Step, y = Salary/1000, group = Range, color = as.factor(Range))) +
       geom_line() +
@@ -86,9 +91,14 @@ server <- function(input, output, session) {
                               "Salary: ", format(Salary, big.mark = ",", decimal.mark = ".", 
                                                  nsmall = 2), "<br>"
     ))
-    
     ggplotly(s, tooltip = "text")
-})
+    })
+    
+  #Tab 3
+    output$table <- renderTable(
+      summ 
+    )
+
 }
 
 shinyApp(ui = ui, server = server)

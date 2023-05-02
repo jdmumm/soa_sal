@@ -33,18 +33,7 @@ for (i in 2:num_pages) {
 
 write.csv(dat, './data/sal_allDepts_22_10K.csv')
 
-#SUMMARIZE 
-# # 
-# dat %>% mutate(wages = as.numeric(gsub("\\$|,", "", Annual.Wages))) -> dat
-# dat %>% group_by (Title) %>% summarize (
-#     mean = mean(wages), 
-#     min = min(wages),
-#     max = max(wages),
-#     n = n()
-# ) -> summ
-# summ
-# 
-# write.csv(summ,"SAL_ADFG_22_sum.csv")
+
 
 
 
