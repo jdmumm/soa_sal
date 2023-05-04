@@ -5,6 +5,8 @@ library(tidyverse)
 library(plotly)
 library(knitr)
 library(kableExtra)
+library(DT)
+library(scales)
 
 read.csv("sal_allDepts_22.csv") -> raw
 raw %>% mutate (Class = str_remove(Title, "\\s*\\d+$"),
@@ -13,6 +15,16 @@ raw %>% mutate (Class = str_remove(Title, "\\s*\\d+$"),
 read.csv("salSched_c23_220701_ann_long.csv") -> sal_long
 
 read.csv("sal_allDepts_22_sum.csv", row.names = 1) -> summ
+  format_col <- function(x) {paste0("$", format(round(x, 2), nsmall = 2, big.mark = ","))}
+  summ[,2:4] <- lapply(summ[,2:4], format_col) 
+
+default_classes <- c('Fish and Game Coordinator', 'Program Coordinator', 'Project Assistant',
+  'Fisheries Scientist', 'Fishery Biologist', 'Wildlife Biologist',
+  'Wildlife Scientist', 'Data Processing Manager', 'Fish & Game Coordinator',
+  'Biometrician','Research Analyst', 'Analyst/Programmer', 'Gis Analyst',
+  'Fish & Game Coordinator', 'Commissioner', 'Division Director', 'Deputy Director',
+  'Habitat Biologist', 'Natural Resource Manager', 'Division Operations Manager',
+  'Special Projects Assistant', 'Special Assistant To The Commissioner', 'Special Projects Assitant')
 
 ui <- navbarPage(
   title = "State of Alaska Salaries, 2022",
@@ -24,14 +36,7 @@ ui <- navbarPage(
                          selected = "Alaska Department of Fish and Game"),
       selectizeInput("classes", "Select Job Class(es)", 
                      choices = c("All", unique(arrange(data, Class)$Class)),
-                     multiple = TRUE, selected = (c
-                                                  ('Gis Analyst','Biometrician','Research Analyst', 'Analyst/Programmer',
-                                                    'Fish and Game Coordinator', 'Program Coordinator', 'Project Assistant',
-                                                    'Fisheries Scientist', 'Fishery Biologist', 'Wildlife Biologist',
-                                                    'Wildlife Scientist', 'Data Processing Manager', 'Fish & Game Coordinator', 
-                                                    'Fish & Game Coordinator', 'Commissioner', 'Division Director', 'Deputy Director',
-                                                    'Habitat Biologist', 'Natural Resource Manager', 'Division Operations Manager',
-                                                    'Special Projects Assistant'))
+                     multiple = TRUE, selected = (default_classes)
       ), 
       width = 3,
       helpText("Warning: Selecting 'All' for both Department and Class may take several minutes to process."),
@@ -50,7 +55,7 @@ ui <- navbarPage(
           ),
     
   #tabPanel("Summary Table by Title", tableOutput("kable_tab"))
-   tabPanel("Summary Table", tableOutput("table"))
+  tabPanel("Summary Table", DT::dataTableOutput("table"))
 )
 
 server <- function(input, output, session) {
@@ -66,7 +71,7 @@ server <- function(input, output, session) {
       
       
       p <- ggplot(data_subset, aes(x=Title, y=wages)) +
-        geom_point(alpha = .2)
+        geom_point(alpha = .15)
       
       p <- p + aes(text = paste(Name, "<br>",
                                 Title, "<br>",
@@ -96,10 +101,15 @@ server <- function(input, output, session) {
     })
     
   #Tab 3
-    output$table <- renderTable(
-      summ 
-    )
-
+    output$table <- DT::renderDataTable({
+      datatable(summ,
+                filter = "top",
+                options = list(
+                  lengthMenu = list(c(10, 20, 50, 100, -1), c("10", "20", "50", "100",  "All")),
+                  pageLength = -1,
+                  orderClasses = TRUE
+                ))
+    })
 }
 
 shinyApp(ui = ui, server = server)
