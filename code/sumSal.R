@@ -1,6 +1,6 @@
 library(tidyverse)
 
-dat <- read.csv('./data/sal_allDepts_22_10K.csv')
+dat <- read.csv('./data/sal_allDepts_22.csv')
 
 #summarize
 dat %>% mutate(wages = as.numeric(gsub("\\$|,", "", Annual.Wages))) -> dat

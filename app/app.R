@@ -6,7 +6,7 @@ library(plotly)
 library(knitr)
 library(kableExtra)
 
-read.csv("sal_allDepts_22_10K.csv") -> raw
+read.csv("sal_allDepts_22.csv") -> raw
 raw %>% mutate (Class = str_remove(Title, "\\s*\\d+$"),
                 wages = as.numeric(gsub("[^0-9.]", "", Annual.Wages))) -> data
 
@@ -16,7 +16,7 @@ read.csv("sal_allDepts_22_sum.csv", row.names = 1) -> summ
 
 ui <- navbarPage(
   title = "State of Alaska Salaries, 2022",
-  tabPanel("Salary by Title",
+  tabPanel("Salary Plot by Title",
   sidebarLayout(
     sidebarPanel(
       checkboxGroupInput("employers", "Select Department(s)", 
@@ -30,7 +30,8 @@ ui <- navbarPage(
                                                     'Fisheries Scientist', 'Fishery Biologist', 'Wildlife Biologist',
                                                     'Wildlife Scientist', 'Data Processing Manager', 'Fish & Game Coordinator', 
                                                     'Fish & Game Coordinator', 'Commissioner', 'Division Director', 'Deputy Director',
-                                                    'Habitat Biologist', 'Natural Resource Manager', 'Division Operations Manager'))
+                                                    'Habitat Biologist', 'Natural Resource Manager', 'Division Operations Manager',
+                                                    'Special Projects Assistant'))
       ), 
       width = 3,
       helpText("Warning: Selecting 'All' for both Department and Class may take several minutes to process."),
@@ -42,14 +43,14 @@ ui <- navbarPage(
     )
   )),
   
-    tabPanel("Salary by Range and Step",
+    tabPanel("Nominal Salary Schedule",
             plotlyOutput("plot2", height = "800px", width = "100%"), 
             helpText("Step advancement is annual until step J, at which point it becomes biennial."),
             HTML("<a href='https://doa.alaska.gov/dof/payroll/sal_sched.html'> Data Source </a>")
           ),
     
   #tabPanel("Summary Table by Title", tableOutput("kable_tab"))
-   tabPanel("Summary Table by Title", tableOutput("table"))
+   tabPanel("Summary Table", tableOutput("table"))
 )
 
 server <- function(input, output, session) {
