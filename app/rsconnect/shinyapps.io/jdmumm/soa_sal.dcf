@@ -5,9 +5,9 @@ account: jdmumm
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9005134
-bundleId: 7171822
+bundleId: 7177331
 url: https://jdmumm.shinyapps.io/soa_sal/
-when: 1683167574.32404
-lastSyncTime: 1683167574.32405
+when: 1683270181.30849
+lastSyncTime: 1683270181.3085
 asMultiple: FALSE
 asStatic: FALSE
