@@ -13,26 +13,16 @@ table_df <- data.frame(lapply(table_df, function(x) as.numeric(gsub(",", "", x))
 colnames(table_df) <- setdiff(LETTERS, c("H", "I"))
 table_df$Range <- 5:27
 
-#write.csv(table_df, "salSched_c23_220701.csv", row.names =FALSE)
-
+write.csv(table_df, "salSched_c23_220701.csv", row.names =FALSE)
 read.csv("salSched_c23_220701.csv") -> sal
+
 sal[,1:24] <- sal[,1:24] * 26 # biweekly to annual. Exclude range column
 
+# add extra steps to reflect biennial after step j
 sal %>% 
   mutate(J2 = J, K2 = K, L2 = L, M2 = M, N2 = N, O2 = O, P2 = P, Q2 = Q, R2 = R, S2 = S, T2 = T, U2 = U,
          V2 = V, W2 = W, X2 = X, Y2 = Y, Z2 = Z) -> sal
 sal_long <- gather(sal, key = "Step", value = "Salary", -Range)
+
 write.csv(sal_long, "salSched_c23_220701_ann_long.csv")
 
-ggplot(sal_long, aes(x = Step, y = Salary, group = Range, color = as.factor(Range))) +
-  geom_line() +
-  labs(x = "Step", y = "Salary (thousands)", color = "Range") -> s
-
-s <- s + aes(text = paste("Range: ", Range, "<br>",
-                          "Step: ", Step, "<br>",
-                          "Salary: ", format(Salary, big.mark = ",", decimal.mark = ".", 
-                                              nsmall = 2), "<br>"
-                          ))
-
-s_p <- ggplotly(s, tooltip = "text")
-s_p

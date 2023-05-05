@@ -10,6 +10,5 @@ dat %>% group_by (Title) %>% summarize (
     max = max(wages),
     n = n()
 ) -> summ
-summ
 
-write.csv(summ,"./data/sal_allDepts_22_sum.csv")
+summ %>% write.csv("./data/sal_allDepts_22_sum.csv")
